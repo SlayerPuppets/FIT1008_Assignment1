@@ -39,6 +39,7 @@ class MonsterTeam:
     def __init__(self, team_mode: TeamMode, selection_mode, **kwargs) -> None:
         # Add any preinit logic here.
         self.team_mode = team_mode
+        self.team_data = ArrayR(self.TEAM_LIMIT)
         if selection_mode == self.SelectionMode.RANDOM:
             self.select_randomly(**kwargs)
         elif selection_mode == self.SelectionMode.MANUAL:
@@ -49,13 +50,64 @@ class MonsterTeam:
             raise ValueError(f"selection_mode {selection_mode} not supported.")
 
     def add_to_team(self, monster: MonsterBase):
-        raise NotImplementedError
+        if len(self.team_data) >= self.TEAM_LIMIT:
+            raise ValueError("Team is already full")
+
+        new_team = ArrayR(self.TEAM_LIMIT)
+
+        if self.team_mode == self.TeamMode.FRONT:
+            new_team[0] = monster
+            for i in range(len(self.team_data)):
+                new_team[i + 1] = self.team_data[i]
+        elif self.team_mode == self.TeamMode.BACK:
+            for i in range(len(self.team_data)):
+                new_team[i] = self.team_data[i]
+            new_team[len(self.team_data)] = monster
+        elif self.team_mode == self.TeamMode.OPTIMISE:
+            inserted = False
+            for i in range(len(self.team_data)):
+                if monster.get_hp() >= self.team_data[i].get_hp():
+                    new_team[i] = monster
+                    for j in range(i, len(self.team_data)):
+                        new_team[j + 1] = self.team_data[j]
+                    inserted = True
+                    break
+                new_team[i] = self.team_data[i]
+            if not inserted:
+                new_team[len(self.team_data)] = monster
+
+        self.team_data = new_team
 
     def retrieve_from_team(self) -> MonsterBase:
-        raise NotImplementedError
+        if len(self.team_data) == 0:
+            raise ValueError("Team is empty")
+
+        monster = self.team_data[0]
+
+        new_team = ArrayR(self.TEAM_LIMIT)
+        for i in range(1, len(self.team_data)):
+            new_team[i - 1] = self.team_data[i]
+
+        self.team_data = new_team
+        return monster
 
     def special(self) -> None:
-        raise NotImplementedError
+        if self.team_mode == self.TeamMode.FRONT:
+            for i in range(min(3, len(self.team_data))):
+                self.team_data[i], self.team_data[len(self.team_data) - i - 1] = self.team_data[
+                    len(self.team_data) - i - 1], self.team_data[i]
+        elif self.team_mode == self.TeamMode.BACK:
+            mid = len(self.team_data) // 2
+            if len(self.team_data) % 2 == 0:  # Even number of monsters
+                for i in range(mid):
+                    self.team_data[i], self.team_data[mid + i] = self.team_data[mid + i], self.team_data[i]
+            else:  # Odd number of monsters
+                for i in range(mid):
+                    self.team_data[i], self.team_data[mid + 1 + i] = self.team_data[mid + 1 + i], self.team_data[i]
+        elif self.team_mode == self.TeamMode.OPTIMISE:
+            reversed_team_data = ArrayR(len(self.team_data))
+            for i in range(len(self.team_data)):
+                self.team_data[i] = reversed_team_data[len(self.team_data) - i - 1]
 
     def regenerate_team(self) -> None:
         raise NotImplementedError
