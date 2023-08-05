@@ -12,39 +12,54 @@ class MonsterBase(abc.ABC):
         :simple_mode: Whether to use the simple or complex stats of this monster
         :level: The starting level of this monster. Defaults to 1.
         """
-        raise NotImplementedError
+        """The method is simple assignment of variables, which makes it complexity O(1) best/worst cases"""
+        self.simple_mode = simple_mode
+        self.level = level
+
+        if self.simple_mode:
+            simple_stats = self.get_simple_stats()
+            self.attack = simple_stats.get_attack()
+            self.defense = simple_stats.get_defense()
+            self.speed = simple_stats.get_speed()
+            self.max_hp = simple_stats.get_max_hp()
+        else:
+            complex_stats = self.get_complex_stats()
+            self.attack = complex_stats.get_attack(level)
+            self.defense = complex_stats.get_defense(level)
+            self.speed = complex_stats.get_speed(level)
+            self.max_hp = complex_stats.get_max_hp(level)
 
     def get_level(self):
         """The current level of this monster instance"""
-        raise NotImplementedError
+        return self.level
 
     def level_up(self):
         """Increase the level of this monster instance by 1"""
-        raise NotImplementedError
+        self.level += 1
 
     def get_hp(self):
         """Get the current HP of this monster instance"""
-        raise NotImplementedError
+        return self.hp
 
     def set_hp(self, val):
         """Set the current HP of this monster instance"""
-        raise NotImplementedError
+        self.hp = val
 
     def get_attack(self):
         """Get the attack of this monster instance"""
-        raise NotImplementedError
+        return self.attack
 
     def get_defense(self):
         """Get the defense of this monster instance"""
-        raise NotImplementedError
+        return self.defense
 
     def get_speed(self):
         """Get the speed of this monster instance"""
-        raise NotImplementedError
+        return self.speed
 
     def get_max_hp(self):
         """Get the maximum HP of this monster instance"""
-        raise NotImplementedError
+        return self.max_hp
 
     def alive(self) -> bool:
         """Whether the current monster instance is alive (HP > 0 )"""
@@ -53,18 +68,38 @@ class MonsterBase(abc.ABC):
     def attack(self, other: MonsterBase):
         """Attack another monster instance"""
         # Step 1: Compute attack stat vs. defense stat
+        attack_stat = self.get_attack()
+        defense_stat = self.get_defense()
+
+        if defense_stat < attack_stat / 2:
+            damage = attack_stat - defense_stat
+        elif defense_stat < attack_stat:
+            damage = attack_stat * 5/8 - defense_stat / 4
+        else:
+            damage = attack_stat / 4
         # Step 2: Apply type effectiveness
+        element_effectiveness = self.get_effectiveness(other)
+        effective_damage = damage * element_effectiveness
         # Step 3: Ceil to int
+        effective_damage = int(round(effective_damage))
         # Step 4: Lose HP
-        raise NotImplementedError
+        other.set_hp(other.get_hp() - effective_damage)
+
 
     def ready_to_evolve(self) -> bool:
         """Whether this monster is ready to evolve. See assignment spec for specific logic."""
-        raise NotImplementedError
+        return self.get_evolution() is not None and self.level != 1
 
     def evolve(self) -> MonsterBase:
         """Evolve this monster instance by returning a new instance of a monster class."""
-        raise NotImplementedError
+        if self.ready_to_evolve():
+            evolution_class = self.get_evolution()
+            new_monster = evolution_class(simple_mode=self.simple_mode, level=self.level)
+            new_monster.set_hp(self.get_hp())  # Preserve HP
+            return new_monster
+        else:
+            return self
+
 
     ### NOTE
     # Below is provided by the factory - classmethods
