@@ -1,0 +1,621 @@
+- can_be_spawned: true
+  complex:
+    attack: 3
+    defense: 3
+    max_hp: 6
+    speed: 2
+  description: A small, fiery creature with a passion for battle that evolves into
+    a larger, more powerful form.
+  element: Fire
+  evolution: Infernoth
+  name: Flamikin
+  simple:
+    attack: 3
+    defense: 3
+    max_hp: 6
+    speed: 2
+- complex:
+    attack: 4
+    defense: 3
+    max_hp: 8
+    speed: 5
+  description: A fiery warrior Pokemon with a passion for battle that can summon flames
+    from its fists.
+  element: Fire
+  evolution: Infernox
+  name: Infernoth
+  simple:
+    attack: 4
+    defense: 3
+    max_hp: 8
+    speed: 5
+- complex:
+    attack: 8
+    defense: 3
+    max_hp: 13
+    speed: 14
+  description: A fearsome and intimidating Pokemon that can manipulate flames and
+    darkness to its advantage.
+  element: Fire
+  name: Infernox
+  simple:
+    attack: 8
+    defense: 3
+    max_hp: 13
+    speed: 14
+- can_be_spawned: true
+  complex:
+    attack: 3
+    defense: 3
+    max_hp: 8
+    speed: 2
+  description: A playful water-based Pokemon that evolves into a majestic sea creature.
+  element: Water
+  evolution: Marititan
+  name: Aquariuma
+  simple:
+    attack: 3
+    defense: 3
+    max_hp: 8
+    speed: 2
+- complex:
+    attack: 3
+    defense: 5
+    max_hp: 12
+    speed: 2
+  description: A massive sea creature that can create tsunamis with a single wave
+    of its tail.
+  element: Water
+  evolution: Leviatitan
+  name: Marititan
+  simple:
+    attack: 3
+    defense: 5
+    max_hp: 12
+    speed: 2
+- complex:
+    attack: 4
+    defense: 8
+    max_hp: 15
+    speed: 2
+  description: An ancient and legendary Pokemon that can control the seas and summon
+    powerful storms at will.
+  element: Water
+  name: Leviatitan
+  simple:
+    attack: 4
+    defense: 8
+    max_hp: 15
+    speed: 2
+- can_be_spawned: true
+  complex:
+    attack: 4
+    defense: 3
+    max_hp: 6
+    speed: 3
+  description: A quick and agile Pokemon that evolves into a towering, tree-like creature.
+  element: Grass
+  evolution: Treetower
+  name: Vineon
+  simple:
+    attack: 4
+    defense: 3
+    max_hp: 6
+    speed: 3
+- complex:
+    attack: 6
+    defense: 3
+    max_hp: 8
+    speed: 6
+  description: A towering tree-like Pokemon that can manipulate the earth to its advantage.
+  element: Grass
+  evolution: Treemendous
+  name: Treetower
+  simple:
+    attack: 6
+    defense: 3
+    max_hp: 8
+    speed: 6
+- complex:
+    attack: 9
+    defense: 3
+    max_hp: 10
+    speed: 10
+  description: A colossal and sturdy Pokemon that can withstand the strongest winds
+    and resist even the toughest attacks.
+  element: Grass
+  name: Treemendous
+  simple:
+    attack: 9
+    defense: 3
+    max_hp: 10
+    speed: 10
+- can_be_spawned: true
+  complex:
+    attack: 5
+    defense: 4
+    max_hp: 9
+    speed: 1
+  description: A fierce, rocky Pokemon that evolves into a massive, mountain-like
+    beast.
+  element: Rock
+  evolution: Stonemountain
+  name: Rockodile
+  simple:
+    attack: 5
+    defense: 4
+    max_hp: 9
+    speed: 1
+- complex:
+    attack: 6
+    defense: 5
+    max_hp: 11
+    speed: 1
+  description: A colossal mountain-like beast that can cause earthquakes with its
+    tremendous weight.
+  element: Rock
+  name: Stonemountain
+  simple:
+    attack: 6
+    defense: 5
+    max_hp: 11
+    speed: 1
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 2
+    max_hp: 7
+    speed: 9
+  description: A graceful bird Pokemon that evolves into a fierce eagle with razor-sharp
+    talons.
+  element: Flying
+  evolution: Stormeagle
+  name: Gustwing
+  simple:
+    attack: 7
+    defense: 2
+    max_hp: 7
+    speed: 9
+- complex:
+    attack: 11
+    defense: 2
+    max_hp: 9
+    speed: 11
+  description: A fierce eagle Pokemon that can create thunderstorms with its powerful
+    wings.
+  element: Flying
+  name: Stormeagle
+  simple:
+    attack: 11
+    defense: 2
+    max_hp: 9
+    speed: 11
+- can_be_spawned: true
+  complex:
+    attack: 3
+    defense: 4
+    max_hp: 12
+    speed: 1
+  description: A small, icy Pokemon that evolves into a larger, more powerful form
+    with the ability to create blizzards.
+  element: Ice
+  evolution: Blizzarus
+  name: Frostbite
+  simple:
+    attack: 3
+    defense: 4
+    max_hp: 12
+    speed: 1
+- complex:
+    attack: 3
+    defense: 4
+    max_hp: 20
+    speed: 1
+  description: A powerful and mysterious Pokemon that can freeze anything in its path
+    and disappear into thin air.
+  element: Ice
+  name: Blizzarus
+  simple:
+    attack: 3
+    defense: 4
+    max_hp: 20
+    speed: 1
+- can_be_spawned: true
+  complex:
+    attack: 6
+    defense: 2
+    max_hp: 6
+    speed: 13
+  description: A powerful and lightning-fast Pokemon that evolves into a fearsome
+    dragon with the ability to control thunderstorms.
+  element: Electric
+  evolution: Thunderdrake
+  name: Thundrake
+  simple:
+    attack: 6
+    defense: 2
+    max_hp: 6
+    speed: 13
+- complex:
+    attack: 8
+    defense: 2
+    max_hp: 10
+    speed: 16
+  description: A fearsome dragon Pokemon that can control thunderstorms and shoot
+    bolts of lightning from its jaws.
+  element: Electric
+  name: Thunderdrake
+  simple:
+    attack: 8
+    defense: 2
+    max_hp: 10
+    speed: 16
+- can_be_spawned: true
+  complex:
+    attack: 12
+    defense: 0
+    max_hp: 3
+    speed: 0
+  description: A sleek and stealthy Pokemon that evolves into a powerful feline with
+    the ability to control shadows.
+  element: Dark
+  evolution: Nightpanther
+  name: Shadowcat
+  simple:
+    attack: 12
+    defense: 0
+    max_hp: 3
+    speed: 0
+- complex:
+    attack: 12
+    defense: 2
+    max_hp: 10
+    speed: 4
+  description: A stealthy and powerful feline Pokemon that can control shadows and
+    disappear into the darkness.
+  element: Dark
+  name: Nightpanther
+  simple:
+    attack: 12
+    defense: 2
+    max_hp: 10
+    speed: 4
+- can_be_spawned: true
+  complex:
+    attack: 5
+    defense: 2
+    max_hp: 6
+    speed: 5
+  description: A mystical and otherworldly Pokemon that evolves into a graceful, bird-like
+    creature with the power of telekinesis.
+  element: Psychic
+  evolution: Telekite
+  name: Mystifly
+  simple:
+    attack: 5
+    defense: 2
+    max_hp: 6
+    speed: 5
+- complex:
+    attack: 10
+    defense: 3
+    max_hp: 9
+    speed: 4
+  description: A graceful bird-like Pokemon that can move objects with its powerful
+    psychic abilities and fly at amazing speeds.
+  element: Psychic
+  name: Telekite
+  simple:
+    attack: 10
+    defense: 3
+    max_hp: 9
+    speed: 4
+- can_be_spawned: true
+  complex:
+    attack: 3
+    defense: 8
+    max_hp: 13
+    speed: 1
+  description: A sturdy and metallic Pokemon with a powerful horn that evolves into
+    a massive, armored beast.
+  element: Steel
+  evolution: Ironclad
+  name: Metalhorn
+  simple:
+    attack: 3
+    defense: 8
+    max_hp: 13
+    speed: 1
+- complex:
+    attack: 5
+    defense: 10
+    max_hp: 17
+    speed: 1
+  description: An armored and powerful Pokemon with tremendous strength and the ability
+    to withstand even the toughest attacks.
+  element: Steel
+  name: Ironclad
+  simple:
+    attack: 5
+    defense: 10
+    max_hp: 17
+    speed: 1
+- complex:
+    attack: 1
+    defense: 0
+    max_hp: 5
+    speed: 3
+  description: A small, unassuming snake Pokemon with a curious nature.
+  element: Normal
+  name: Normake
+  simple:
+    attack: 1
+    defense: 0
+    max_hp: 5
+    speed: 3
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A quick and agile snake Pokemon with powerful strikes.
+  element: Fighting
+  evolution: Normake
+  name: Strikeon
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A venomous snake Pokemon that can paralyze its prey with a single bite.
+  element: Poison
+  evolution: Normake
+  name: Venomcoil
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A massive snake Pokemon with the power to control the elements.
+  element: Dragon
+  evolution: Normake
+  name: Pythondra
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A powerful snake Pokemon with an iron grip and sharp claws.
+  element: Steel
+  evolution: Normake
+  name: Constriclaw
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A lightning-fast snake Pokemon capable of shocking its enemies with
+    a jolt of electricity.
+  element: Electric
+  evolution: Normake
+  name: Shockserpent
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A ghostly snake Pokemon that can phase through objects and disappear
+    into thin air.
+  element: Ghost
+  evolution: Normake
+  name: Driftsnake
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A sleek and slippery snake Pokemon with the ability to swim at incredible
+    speeds.
+  element: Water
+  evolution: Normake
+  name: Aquanake
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A fiery snake Pokemon that can create intense flames with a flick of
+    its tail.
+  element: Fire
+  evolution: Normake
+  name: Flameserpent
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A snake Pokemon with the power to control plants and the ability to
+    camouflage itself in the forest.
+  element: Grass
+  evolution: Normake
+  name: Leafadder
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A cold-blooded snake Pokemon that can freeze its prey with a touch.
+  element: Ice
+  evolution: Normake
+  name: Iceviper
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A sturdy snake Pokemon with the ability to crush boulders with its
+    powerful coils.
+  element: Rock
+  evolution: Normake
+  name: Rockpython
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A musical snake Pokemon with the ability to create powerful soundwaves
+    with its voice.
+  element: Flying
+  evolution: Normake
+  name: Soundcobra
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A psychic snake Pokemon with the power to manipulate the minds of others.
+  element: Psychic
+  evolution: Normake
+  name: Psychosnake
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A burrowing snake Pokemon with the ability to create earthquakes with
+    its powerful strikes.
+  element: Ground
+  evolution: Normake
+  name: Groundviper
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A charming and mischievous snake Pokemon with the power to cast spells
+    and create illusions.
+  element: Fairy
+  evolution: Normake
+  name: Faeboa
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A venomous snake Pokemon with the ability to control insects and swarm
+    its enemies.
+  element: Bug
+  evolution: Normake
+  name: Bugrattler
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+- can_be_spawned: true
+  complex:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
+  description: A sneaky and cunning snake Pokemon with the power to create darkness
+    and confusion.
+  element: Dark
+  evolution: Normake
+  name: Darkadder
+  simple:
+    attack: 7
+    defense: 7
+    max_hp: 5
+    speed: 7
