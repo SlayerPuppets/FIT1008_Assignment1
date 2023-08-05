@@ -7,6 +7,7 @@ from base_enum import BaseEnum
 
 from data_structures.referential_array import ArrayR
 
+
 class Element(BaseEnum):
     """
     Element Class to store all different elements as constants, and associate indicies with them.
@@ -45,6 +46,7 @@ class Element(BaseEnum):
             if elem.name.lower() == string.lower():
                 return elem
         raise ValueError(f"Unexpected string {string}")
+
 
 class EffectivenessCalculator:
     """
@@ -86,10 +88,8 @@ class EffectivenessCalculator:
 
         Example: EffectivenessCalculator.get_effectiveness(Element.FIRE, Element.WATER) == 0.5
         """
-        if cls.instance is None:
-            raise ValueError("EffectivenessCalculator instance not created. Call make_singleton first.")
-        attacking_index = type1.value
-        defending_index = type2.value
+        attacking_index = type1.value - 1
+        defending_index = type2.value - 1
         return cls.instance.effectiveness_values[attacking_index * cls.instance.size + defending_index]
 
     @classmethod
@@ -112,8 +112,8 @@ class EffectivenessCalculator:
     def make_singleton(cls):
         cls.instance = EffectivenessCalculator.from_csv("type_effectiveness.csv")
 
-EffectivenessCalculator.make_singleton()
 
+EffectivenessCalculator.make_singleton()
 
 if __name__ == "__main__":
     print(EffectivenessCalculator.get_effectiveness(Element.FIRE, Element.WATER))

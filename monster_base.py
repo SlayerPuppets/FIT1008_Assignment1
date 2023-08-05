@@ -1,11 +1,12 @@
 from __future__ import annotations
 import abc
-
+from elements import EffectivenessCalculator, Element
 from stats import Stats
+
 
 class MonsterBase(abc.ABC):
 
-    def __init__(self, simple_mode=True, level:int=1) -> None:
+    def __init__(self, simple_mode=True, level: int = 1) -> None:
         """
         Initialise an instance of a monster.
 
@@ -15,6 +16,7 @@ class MonsterBase(abc.ABC):
         """The method is simple assignment of variables, which makes it complexity O(1) best/worst cases"""
         self.simple_mode = simple_mode
         self.level = level
+        self.hp = self.get_max_hp()
 
         if self.simple_mode:
             simple_stats = self.get_simple_stats()
@@ -74,17 +76,18 @@ class MonsterBase(abc.ABC):
         if defense_stat < attack_stat / 2:
             damage = attack_stat - defense_stat
         elif defense_stat < attack_stat:
-            damage = attack_stat * 5/8 - defense_stat / 4
+            damage = attack_stat * 5 / 8 - defense_stat / 4
         else:
             damage = attack_stat / 4
         # Step 2: Apply type effectiveness
-        element_effectiveness = self.get_effectiveness(other)
-        effective_damage = damage * element_effectiveness
+        attacker_element = Element.from_string(self.get_element())
+        defender_element = Element.from_string(other.get_element())
+        type_effectiveness = EffectivenessCalculator.get_effectiveness(attacker_element, defender_element)
+        effective_damage = damage * type_effectiveness
         # Step 3: Ceil to int
         effective_damage = int(round(effective_damage))
         # Step 4: Lose HP
         other.set_hp(other.get_hp() - effective_damage)
-
 
     def ready_to_evolve(self) -> bool:
         """Whether this monster is ready to evolve. See assignment spec for specific logic."""
@@ -99,7 +102,6 @@ class MonsterBase(abc.ABC):
             return new_monster
         else:
             return self
-
 
     ### NOTE
     # Below is provided by the factory - classmethods

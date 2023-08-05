@@ -2,6 +2,7 @@ import abc
 
 from data_structures.referential_array import ArrayR
 
+
 class Stats(abc.ABC):
 
     @abc.abstractmethod
@@ -23,6 +24,7 @@ class Stats(abc.ABC):
 
 class SimpleStats(Stats):
     """Unless stated otherwise, all methods in this classes are O(1) best/worst case."""
+
     def __init__(self, attack, defense, speed, max_hp) -> None:
         # TODO: Implement
         self.attack = attack
@@ -42,14 +44,15 @@ class SimpleStats(Stats):
     def get_max_hp(self):
         return self.max_hp
 
+
 class ComplexStats(Stats):
 
     def __init__(
-        self,
-        attack_formula: ArrayR[str],
-        defense_formula: ArrayR[str],
-        speed_formula: ArrayR[str],
-        max_hp_formula: ArrayR[str],
+            self,
+            attack_formula: ArrayR[str],
+            defense_formula: ArrayR[str],
+            speed_formula: ArrayR[str],
+            max_hp_formula: ArrayR[str],
     ) -> None:
         # TODO: Implement
         pass
