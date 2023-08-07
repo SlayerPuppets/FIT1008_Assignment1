@@ -238,7 +238,58 @@ class MonsterTeam:
         This monster cannot be spawned.
         Which monster are you spawning? 1
         """
-        raise NotImplementedError
+
+        """"    Time Complexity Analysis:
+
+        Prompting for team size: O(1)
+        Looping through the team size and monster selection process: O(n)
+        Within this loop, getting available monster classes and printing them: O(k), where k is the number of available monsters
+        Each selection process and checks: O(1)
+        Looping through the selected monsters and adding them to the team: O(n)
+        Overall worst-case time complexity: O(n * k), where n is the team size and k is the number of available monsters.
+        Overall best-case time complexity: O(n * k), same as worst-case.
+        """
+        try:
+            # Prompt user for team size
+            team_size = int(input("How many monsters are there? "))
+            if team_size <= 0:
+                print("Team size must be a positive integer.")
+                return
+
+            # Get the available monster classes
+            monsters = get_all_monsters()
+
+            # Initialize an empty list to store selected monsters
+            selected_monsters = []
+
+            # Prompt user for each monster in the team
+            for _ in range(team_size):
+                print("MONSTERS Available:")
+                for index, monster_class in enumerate(monsters, 1):
+                    spawnable_status = "✔️" if monster_class.can_be_spawned() else "❌"
+                    print(f"{index}: {monster_class.get_name()} [{spawnable_status}]")
+
+                while True:
+                    try:
+                        selected_index = int(input("Which monster are you spawning? "))
+                        if 1 <= selected_index <= len(monsters):
+                            selected_monster_class = monsters[selected_index - 1]
+                            if selected_monster_class.can_be_spawned():
+                                selected_monsters.append(selected_monster_class())
+                                break
+                            else:
+                                print("This monster cannot be spawned. Please select another.")
+                        else:
+                            print("Invalid monster index. Please try again.")
+                    except ValueError:
+                        print("Invalid input. Please enter a valid monster index.")
+
+            # Add the selected monsters to the team in the same order
+            for monster in selected_monsters:
+                self.add_to_team(monster)
+
+        except ValueError:
+            print("Invalid input. Please enter a valid team size.")
 
     def select_provided(self, provided_monsters:Optional[ArrayR[type[MonsterBase]]]=None):
         """
