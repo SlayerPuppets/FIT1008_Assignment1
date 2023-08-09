@@ -20,7 +20,6 @@ class Element(BaseEnum):
     print(Element.from_string("Ice")) # Element.ICE
     ```
     """
-
     FIRE = auto()
     WATER = auto()
     GRASS = auto()
@@ -79,7 +78,6 @@ class EffectivenessCalculator:
         """
         self.element_names = element_names
         self.effectiveness_values = effectiveness_values
-        self.size = len(element_names)
 
     @classmethod
     def get_effectiveness(cls, type1: Element, type2: Element) -> float:
@@ -88,9 +86,11 @@ class EffectivenessCalculator:
 
         Example: EffectivenessCalculator.get_effectiveness(Element.FIRE, Element.WATER) == 0.5
         """
-        attacking_index = type1.value - 1
-        defending_index = type2.value - 1
-        return cls.instance.effectiveness_values[attacking_index * cls.instance.size + defending_index]
+        for i in range(len(cls.instance.element_names)):
+            for j in range(len(cls.instance.element_names)):
+                if (type1.name == cls.instance.element_names[i].upper() and
+                        type2.name == cls.instance.element_names[j].upper()):
+                    return cls.instance.effectiveness_values[i*len(cls.instance.element_names)+j]
 
     @classmethod
     def from_csv(cls, csv_file: str) -> EffectivenessCalculator:
