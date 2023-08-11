@@ -12,8 +12,8 @@ from data_structures.referential_array import ArrayR
 if TYPE_CHECKING:
     from battle import Battle
 
-class MonsterTeam:
 
+class MonsterTeam:
     class TeamMode(BaseEnum):
 
         FRONT = auto()
@@ -110,7 +110,17 @@ class MonsterTeam:
                 self.team_data[i] = reversed_team_data[len(self.team_data) - i - 1]
 
     def regenerate_team(self) -> None:
-        raise NotImplementedError
+        """
+        Regenerates the team by recreating each monster instance and resetting their attributes.
+
+        :complexity: O(n), where n is the size of the team.
+        """
+        new_team = ArrayR(self.TEAM_LIMIT)
+        for i in self.team_data:
+            new_monster = type(self.team_data[i])(self.team_data[i].simple_mode,
+                                                  level=1)  # Recreate the monster instance
+            new_team[i] = new_monster  # Add the monster to the new team
+        self.team_data = new_team
 
     def select_randomly(self):
         team_size = RandomGen.randint(1, self.TEAM_LIMIT)
@@ -121,14 +131,14 @@ class MonsterTeam:
                 n_spawnable += 1
 
         for _ in range(team_size):
-            spawner_index = RandomGen.randint(0, n_spawnable-1)
+            spawner_index = RandomGen.randint(0, n_spawnable - 1)
             cur_index = -1
             for x in range(len(monsters)):
                 if monsters[x].can_be_spawned():
                     cur_index += 1
                     if cur_index == spawner_index:
                         # Spawn this monster
-                        self.add_to_team(monsters[x]())
+                        self.add_to_team(monsters[x])
                         break
             else:
                 raise ValueError("Spawning logic failed.")
@@ -249,49 +259,79 @@ class MonsterTeam:
         Overall worst-case time complexity: O(n * k), where n is the team size and k is the number of available monsters.
         Overall best-case time complexity: O(n * k), same as worst-case.
         """
-        try:
-            # Prompt user for team size
-            team_size = int(input("How many monsters are there? "))
-            if team_size <= 0:
-                print("Team size must be a positive integer.")
-                return
+        while True:
+            try:
+                team_size = int(input("How many monsters are there? "))
+                if 1 <= team_size <= self.TEAM_LIMIT:
+                    break
+                else:
+                    print(f"Team size should be between 1 and {self.TEAM_LIMIT}.")
+            except ValueError:
+                print("Invalid input. Please enter a valid integer.")
 
-            # Get the available monster classes
-            monsters = get_all_monsters()
+        print("MONSTERS Are:")
+        monsters = get_all_monsters()
+        for i, monster_cls in enumerate(monsters, start=1):
+            print(f"{i}: {monster_cls.get_name()} [{'✔️' if monster_cls.can_be_spawned() else '❌'}]")
 
-            # Initialize an empty list to store selected monsters
-            selected_monsters = []
+        # For each monster in the team
+        for _ in range(team_size):
+            while True:
+                try:
+                    selection = int(input("Which monster are you spawning? "))
+                    if 1 <= selection <= len(monsters) and monsters[selection - 1].can_be_spawned():
+                        self.add_to_team(monsters[selection - 1])
+                        break
+                    else:
+                        print("Invalid selection. Please choose a valid monster.")
+                except ValueError:
+                    print("Invalid input. Please enter a valid integer.")
 
-            # Prompt user for each monster in the team
-            for _ in range(team_size):
-                print("MONSTERS Available:")
-                for index, monster_class in enumerate(monsters, 1):
-                    spawnable_status = "✔️" if monster_class.can_be_spawned() else "❌"
-                    print(f"{index}: {monster_class.get_name()} [{spawnable_status}]")
+        # try:
+        #     # Prompt user for team size
+        #     team_size = int(input("How many monsters are there? "))
+        #     if team_size <= 0:
+        #         print("Team size must be a positive integer.")
+        #         return
+        #
+        #     # Get the available monster classes
+        #     monsters = get_all_monsters()
+        #
+        #     # Initialize an empty array to store selected monsters
+        #     selected_monsters = ArrayR(self.TEAM_LIMIT)
+        #     sel_index = 0
+        #
+        #     # Prompt user for each monster in the team
+        #     for _ in range(team_size):
+        #         print("MONSTERS Available:")
+        #         for index, monster_class in enumerate(monsters, 1):
+        #             spawnable_status = "✔️" if monster_class.can_be_spawned() else "❌"
+        #             print(f"{index}: {monster_class.get_name()} [{spawnable_status}]")
+        #
+        #         while True:
+        #             try:
+        #                 selected_index = int(input("Which monster are you spawning? "))
+        #                 if 1 <= selected_index <= len(monsters):
+        #                     selected_monster_class = monsters[selected_index - 1]
+        #                     if selected_monster_class.can_be_spawned():
+        #                         selected_monsters[sel_index] = selected_monster_class
+        #                         sel_index += 1
+        #                         break
+        #                     else:
+        #                         print("This monster cannot be spawned. Please select another.")
+        #                 else:
+        #                     print("Invalid monster index. Please try again.")
+        #             except ValueError:
+        #                 print("Invalid input. Please enter a valid monster index.")
+        #
+        #     # Add the selected monsters to the team in the same order
+        #     for monster in selected_monsters:
+        #         self.add_to_team(monster)
+        #
+        # except ValueError:
+        #     print("Invalid input. Please enter a valid team size.")
 
-                while True:
-                    try:
-                        selected_index = int(input("Which monster are you spawning? "))
-                        if 1 <= selected_index <= len(monsters):
-                            selected_monster_class = monsters[selected_index - 1]
-                            if selected_monster_class.can_be_spawned():
-                                selected_monsters.append(selected_monster_class())
-                                break
-                            else:
-                                print("This monster cannot be spawned. Please select another.")
-                        else:
-                            print("Invalid monster index. Please try again.")
-                    except ValueError:
-                        print("Invalid input. Please enter a valid monster index.")
-
-            # Add the selected monsters to the team in the same order
-            for monster in selected_monsters:
-                self.add_to_team(monster)
-
-        except ValueError:
-            print("Invalid input. Please enter a valid team size.")
-
-    def select_provided(self, provided_monsters:Optional[ArrayR[type[MonsterBase]]]=None):
+    def select_provided(self, provided_monsters: Optional[ArrayR[type[MonsterBase]]] = None):
         """
         Generates a team based on a list of already provided monster classes.
 
@@ -304,7 +344,24 @@ class MonsterTeam:
         Example team if in TeamMode.FRONT:
         [Gustwing Instance, Aquariuma Instance, Flamikin Instance]
         """
-        raise NotImplementedError
+
+        """
+        Generates a team based on a list of already provided monster classes.
+
+        While the type hint implies the argument can be None, this method should never be called without the list.
+        Monsters should be added to the team in the same order as the provided array.
+
+        :param provided_monsters: ArrayR of MonsterBase subclasses to form the initial team.
+        :complexity: O(n), where n is the size of the provided_monsters array.
+        """
+        self.team_data = ArrayR(self.TEAM_LIMIT)
+
+        # Loop through the provided monsters and add them to the team
+        for monster_class in provided_monsters:
+            if len(self.team_data) >= self.TEAM_LIMIT:
+                break  # Stop if the team is already full
+            new_monster = monster_class(simple_mode=True, level=1)
+            self.add_to_team(new_monster)
 
     def choose_action(self, currently_out: MonsterBase, enemy: MonsterBase) -> Battle.Action:
         # This is just a placeholder function that doesn't matter much for testing.
@@ -312,6 +369,14 @@ class MonsterTeam:
         if currently_out.get_speed() >= enemy.get_speed() or currently_out.get_hp() >= enemy.get_hp():
             return Battle.Action.ATTACK
         return Battle.Action.SWAP
+
+
+    def __len__(self) -> int:
+        """
+        Returns the number of monsters currently in the team.
+        :return: Number of monsters in the team.
+        """
+        return len(self.team_data)
 
 if __name__ == "__main__":
     team = MonsterTeam(

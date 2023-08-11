@@ -86,11 +86,15 @@ class EffectivenessCalculator:
 
         Example: EffectivenessCalculator.get_effectiveness(Element.FIRE, Element.WATER) == 0.5
         """
-        for i in range(len(cls.instance.element_names)):
-            for j in range(len(cls.instance.element_names)):
-                if (type1.name == cls.instance.element_names[i].upper() and
-                        type2.name == cls.instance.element_names[j].upper()):
-                    return cls.instance.effectiveness_values[i*len(cls.instance.element_names)+j]
+        element_names = cls.instance.element_names
+        element_index = ArrayR(len(element_names))
+        for i in range(len(element_names)):
+            element_index[i] = Element[str(element_names[i]).upper()].value
+
+        for i in range(len(element_names)):
+            for j in range(len(element_names)):
+                if type1.name == element_names[i].upper() and type2.name == element_names[j].upper():
+                    return cls.instance.effectiveness_values[i*len(element_names)+j]
 
     @classmethod
     def from_csv(cls, csv_file: str) -> EffectivenessCalculator:
