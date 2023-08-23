@@ -8,6 +8,7 @@ from random_gen import RandomGen
 from helpers import get_all_monsters
 
 from data_structures.referential_array import ArrayR
+from data_structures.queue_adt import CircularQueue
 
 if TYPE_CHECKING:
     from battle import Battle
@@ -38,12 +39,19 @@ class MonsterTeam:
 
     def __init__(self, team_mode: TeamMode, selection_mode, **kwargs) -> None:
         # Add any preinit logic here.
-        self.initial_team_data = None
-        self.team_count = 0
+        self.backup_monsters = None
         self.team_mode = team_mode
+        self.provided_monsters = None
+        self.toggle = True  # True - Descending
+
         if team_mode == MonsterTeam.TeamMode.OPTIMISE:
             self.sort_key = kwargs.get('sort_key', None)
-        self.team_data = ArrayR(self.TEAM_LIMIT)
+
+        if self.team_mode == MonsterTeam.TeamMode.FRONT or self.team_mode == MonsterTeam.TeamMode.BACK:
+            self.team_data = CircularQueue(self.TEAM_LIMIT)
+        elif self.team_mode == MonsterTeam.TeamMode.OPTIMISE:
+            self.team_data = ArrayR(self.TEAM_LIMIT)
+            self.team_count = 0
 
         if selection_mode == self.SelectionMode.RANDOM:
             self.select_randomly(**kwargs)
@@ -69,93 +77,123 @@ class MonsterTeam:
             raise ValueError(f"Unsupported sort_key: {self.sort_key}")
 
     def add_to_team(self, monster: MonsterBase):
-        if self.team_count >= self.TEAM_LIMIT:
+        if len(self) >= self.TEAM_LIMIT:
             raise ValueError("Team is already full!")
 
-        new_team = ArrayR(self.TEAM_LIMIT)
         if self.team_mode == self.TeamMode.FRONT:
-            new_team[0] = monster
-            for i in range(self.team_count):  # Use team_count here
-                new_team[i + 1] = self.team_data[i]
+            old_data = [self.team_data.serve() for _ in range(len(self.team_data))]
+            self.team_data.append(monster)
+            for m in old_data:
+                self.team_data.append(m)
         elif self.team_mode == self.TeamMode.BACK:
-            for i in range(self.team_count):  # Use team_count here
-                new_team[i] = self.team_data[i]
-            new_team[self.team_count] = monster
-        elif self.team_mode == self.TeamMode.OPTIMISE:
-            inserted = False
-            for i in range(self.team_count):  # Use team_count here
-                if not inserted and self.team_data[i] is not None and self._get_sort_value(
-                        monster) > self._get_sort_value(self.team_data[i]):
-                    new_team[i] = monster
-                    inserted = True
-                new_team[i + int(inserted)] = self.team_data[i]
-            if not inserted:
-                new_team[self.team_count] = monster
+            # Use append() method of CircularQueue for BACK mode
+            self.team_data.append(monster)
 
-        self.team_data = new_team
-        self.team_count += 1
-        # new_team = ArrayR(self.TEAM_LIMIT)
-        #
-        # if self.team_mode == self.TeamMode.FRONT:
-        #     new_team[0] = monster
-        #     for i in range(len(self.team_data)):
-        #         new_team[i + 1] = self.team_data[i]
-        # elif self.team_mode == self.TeamMode.BACK:
-        #     for i in range(len(self.team_data)):
-        #         new_team[i] = self.team_data[i]
-        #     new_team[len(self.team_data)] = monster
-        # elif self.team_mode == self.TeamMode.OPTIMISE:
-        #     inserted = False
-        #
-        #     for i in range(len(self.team_data)):
-        #         if monster.get_hp() >= self.team_data[i].get_hp():
-        #             new_team[i] = monster
-        #             for j in range(i, len(self.team_data)):
-        #                 new_team[j + 1] = self.team_data[j]
-        #             inserted = True
-        #             break
-        #         new_team[i] = self.team_data[i]
-        #     if not inserted:
-        #         new_team[len(self.team_data)] = monster
-        #
-        # self.team_data = new_team
+
+        elif self.team_mode == self.TeamMode.OPTIMISE:
+            new_team = ArrayR(self.TEAM_LIMIT)
+            inserted = False
+            j = 0  # To track the index in the new_team Array
+            for i in range(self.team_count):
+                if self.toggle:
+                    condition = not inserted and self._get_sort_value(monster) > self._get_sort_value(self.team_data[i])
+                else:
+                    condition = not inserted and self._get_sort_value(monster) < self._get_sort_value(self.team_data[i])
+
+                if condition:
+                    new_team[j] = monster
+                    inserted = True
+                    j += 1
+                new_team[j] = self.team_data[i]
+                j += 1
+            if not inserted:
+                new_team[j] = monster
+            self.team_data = new_team
+            self.team_count += 1
 
     def retrieve_from_team(self) -> MonsterBase:
-        if self.team_count == 0:
+        if len(self) == 0:
             raise ValueError("Team is empty")
-        monster = self.team_data[0]
-        for i in range(1, self.team_count):
-            self.team_data[i - 1] = self.team_data[i]
+        if self.team_mode in ArrayR(2).from_list([self.TeamMode.FRONT, self.TeamMode.BACK]):
+            return self.team_data.serve()
 
-        self.team_data[self.team_count - 1] = None
+        elif self.team_mode == self.TeamMode.OPTIMISE:
+            monster = self.team_data[0]
+            for i in range(1, self.team_count):
+                self.team_data[i - 1] = self.team_data[i]
 
-        # Decrease the count of monsters
-        self.team_count -= 1
-        return monster
+            self.team_data[self.team_count - 1] = None
+
+            # Decrease the count of monsters
+            self.team_count -= 1
+            return monster
 
     def special(self) -> None:
         if self.team_mode == self.TeamMode.FRONT:
-            # We'll only perform swaps for half of the team, as we're swapping in pairs.
-            swaps = min(3, self.team_count // 2)
-            for i in range(swaps):
-                self.team_data[i], self.team_data[self.team_count - i - 1] = self.team_data[self.team_count - i - 1], \
-                    self.team_data[i]
-        if self.team_mode == MonsterTeam.TeamMode.BACK:
-            mid_point = self.team_count // 2
-            new_team = ArrayR(self.TEAM_LIMIT)
-            # First, place the reversed second half of the original team into the new_team
-            for idx in range(mid_point, self.team_count):
-                new_team[idx - mid_point] = self.team_data[self.team_count - 1 - (idx - mid_point)]
-            # Then, append the first half of the original team into the new_team
-            for idx in range(mid_point):
-                new_team[self.team_count - mid_point + idx] = self.team_data[idx]
+            # Determine how many elements need to be reversed.
+            swaps = min(3, len(self.team_data))
 
-            self.team_data = new_team
+            # Extract first 3 elements using CircularQueue methods.
+            temp_arr_to_reverse = ArrayR(swaps)
+            temp_arr_remaining = ArrayR(len(self.team_data) - swaps)
+
+            for i in range(swaps):
+                temp_arr_to_reverse[i] = self.team_data.serve()
+
+            j = 0
+            while not self.team_data.is_empty():
+                temp_arr_remaining[j] = self.team_data.serve()
+                j += 1
+
+            # Now, add elements from temp_arr_to_reverse (in reverse order) to the team_data.
+            for i in range(swaps - 1, -1, -1):
+                self.team_data.append(temp_arr_to_reverse[i])
+
+            for i in range(len(temp_arr_remaining)):
+                self.team_data.append(temp_arr_remaining[i])
+
+        elif self.team_mode == self.TeamMode.BACK:
+            # Half the size of the team
+            half_size = len(self.team_data) // 2
+
+            # Store the first half in temp_arr1
+            temp_arr1 = ArrayR(half_size)
+            for i in range(half_size):
+                temp_arr1[i] = self.team_data.serve()
+
+            # Store the second half in temp_arr2
+            temp_arr2 = ArrayR(len(self.team_data))
+            index = 0
+            while not self.team_data.is_empty():
+                temp_arr2[index] = self.team_data.serve()
+                index += 1
+
+            # Create a new CircularQueue
+            new_queue = CircularQueue(self.TEAM_LIMIT)
+
+            # First, add the second half in reverse order
+            for i in range(len(temp_arr2) - 1, -1, -1):
+                new_queue.append(temp_arr2[i])
+
+            # Then, add the first half
+            for i in range(len(temp_arr1)):
+                new_queue.append(temp_arr1[i])
+
+            # Set the new queue to team_data
+            self.team_data = new_queue
+
+
+
         elif self.team_mode == self.TeamMode.OPTIMISE:
-            reversed_team_data = ArrayR(self.team_count)  # Use team_count to ensure the correct size.
-            for i in range(self.team_count):  # Loop up to team_count to avoid None values.
+
+            reversed_team_data = ArrayR(self.team_count)
+
+            for i in range(self.team_count):
                 reversed_team_data[i] = self.team_data[self.team_count - i - 1]
+
             self.team_data = reversed_team_data
+
+            self.toggle = not self.toggle
 
     def regenerate_team(self) -> None:
         """
@@ -163,11 +201,34 @@ class MonsterTeam:
 
         :complexity: O(n), where n is the size of the team.
         """
-        new_team = ArrayR(self.TEAM_LIMIT)
-        for i in range(self.team_count):  # Only loop until team_count
-            new_monster = type(self.team_data[i])(self.team_data[i].simple_mode, level=1)  # Recreate the monster instance
-            new_team[i] = new_monster  # Add the monster to the new team
-        self.team_data = new_team
+        # If an original team backup exists, regenerate from it
+        if self.backup_monsters is not None:
+            self.team_data = self.backup_monsters
+
+        else:
+            if self.team_mode == self.TeamMode.FRONT or self.team_mode == self.TeamMode.BACK:
+                new_team = CircularQueue(self.TEAM_LIMIT)
+                for _ in range(len(self.team_data)):
+                    m = self.team_data.serve()
+                    new_team.append(type(m)(m.simple_mode, level=1))
+
+            elif self.team_mode == self.TeamMode.OPTIMISE:
+                n = len(self.team_data)
+                for i in range(1, n):
+                    key = self.team_data[i]
+                    j = i - 1
+                    key_value = self._get_sort_value(key)
+
+                    if self.toggle:  # Descending order
+                        while j >= 0 and key_value > self._get_sort_value(self.team_data[j]):
+                            self.team_data[j + 1] = self.team_data[j]
+                            j -= 1
+                    else:  # Ascending order
+                        while j >= 0 and key_value < self._get_sort_value(self.team_data[j]):
+                            self.team_data[j + 1] = self.team_data[j]
+                            j -= 1
+                    self.team_data[j + 1] = key
+                self.toggle = not self.toggle
 
     def select_randomly(self):
         team_size = RandomGen.randint(1, self.TEAM_LIMIT)
@@ -306,77 +367,6 @@ class MonsterTeam:
         Overall worst-case time complexity: O(n * k), where n is the team size and k is the number of available monsters.
         Overall best-case time complexity: O(n * k), same as worst-case.
         """
-        # while True:
-        #     try:
-        #         team_size = int(input("How many monsters are there? "))
-        #         if 1 <= team_size <= self.TEAM_LIMIT:
-        #             break
-        #         else:
-        #             print(f"Team size should be between 1 and {self.TEAM_LIMIT}.")
-        #     except ValueError:
-        #         print("Invalid input. Please enter a valid integer.")
-        #
-        # print("MONSTERS Are:")
-        # monsters = get_all_monsters()
-        # for i, monster_cls in enumerate(monsters, start=1):
-        #     print(f"{i}: {monster_cls.get_name()} [{'✔️' if monster_cls.can_be_spawned() else '❌'}]")
-        #
-        # # For each monster in the team
-        # for _ in range(team_size):
-        #     while True:
-        #         try:
-        #             selection = int(input("Which monster are you spawning? "))
-        #             if 1 <= selection <= len(monsters) and monsters[selection - 1].can_be_spawned():
-        #                 self.add_to_team(monsters[selection - 1])
-        #                 break
-        #             else:
-        #                 print("Invalid selection. Please choose a valid monster.")
-        #         except ValueError:
-        #             print("Invalid input. Please enter a valid integer.")
-
-        # try:
-        #     # Prompt user for team size
-        #     team_size = int(input("How many monsters are there? "))
-        #     if team_size <= 0:
-        #         print("Team size must be a positive integer.")
-        #         return
-        #
-        #     # Get the available monster classes
-        #     monsters = get_all_monsters()
-        #
-        #     # Initialize an empty array to store selected monsters
-        #     selected_monsters = ArrayR(self.TEAM_LIMIT)
-        #     sel_index = 0
-        #
-        #     # Prompt user for each monster in the team
-        #     for _ in range(team_size):
-        #         print("MONSTERS Available:")
-        #         for index, monster_class in enumerate(monsters, 1):
-        #             spawnable_status = "✔️" if monster_class.can_be_spawned() else "❌"
-        #             print(f"{index}: {monster_class.get_name()} [{spawnable_status}]")
-        #
-        #         while True:
-        #             try:
-        #                 selected_index = int(input("Which monster are you spawning? "))
-        #                 if 1 <= selected_index <= len(monsters):
-        #                     selected_monster_class = monsters[selected_index - 1]
-        #                     if selected_monster_class.can_be_spawned():
-        #                         selected_monsters[sel_index] = selected_monster_class
-        #                         sel_index += 1
-        #                         break
-        #                     else:
-        #                         print("This monster cannot be spawned. Please select another.")
-        #                 else:
-        #                     print("Invalid monster index. Please try again.")
-        #             except ValueError:
-        #                 print("Invalid input. Please enter a valid monster index.")
-        #
-        #     # Add the selected monsters to the team in the same order
-        #     for monster in selected_monsters:
-        #         self.add_to_team(monster)
-        #
-        # except ValueError:
-        #     print("Invalid input. Please enter a valid team size.")
 
         monsters = get_all_monsters()
 
@@ -444,15 +434,6 @@ class MonsterTeam:
         :param provided_monsters: ArrayR of MonsterBase subclasses to form the initial team.
         :complexity: O(n), where n is the size of the provided_monsters array.
         """
-        # self.team_data = ArrayR(self.TEAM_LIMIT)
-        #
-        # # Loop through the provided monsters and add them to the team
-        # for monster_class in provided_monsters:
-        #     if len(self.team_data) >= self.TEAM_LIMIT:
-        #         break  # Stop if the team is already full
-        #     new_monster = monster_class(simple_mode=True, level=1)
-        #     self.add_to_team(new_monster)
-
         if provided_monsters is None:
             raise ValueError("No provided monsters found.")
 
@@ -462,6 +443,36 @@ class MonsterTeam:
             else:
                 raise ValueError(f"Invalid monster class provided: {monster_class}")
 
+        # Create a copy of the original team based on its mode
+        self.backup_monsters = self.clone_team_data()
+
+    def clone_team_data(self):
+        """
+        Clones the team data based on its mode and returns a deep copy.
+        """
+        if self.team_mode == MonsterTeam.TeamMode.OPTIMISE:
+            # If team_mode is OPTIMISE, clone ArrayR
+            cloned_team = ArrayR(self.TEAM_LIMIT)
+            for i in range(len(self)):
+                cloned_team[i] = self.team_data[i]
+
+        elif self.team_mode in [MonsterTeam.TeamMode.FRONT, MonsterTeam.TeamMode.BACK]:
+            # If team_mode is FRONT or BACK, clone CircularQueue
+            cloned_team = CircularQueue(self.TEAM_LIMIT)
+            temp_queue = CircularQueue(self.TEAM_LIMIT)
+
+            # Empty the current queue into the temp_queue
+            while not self.team_data.is_empty():
+                item = self.team_data.serve()
+                cloned_team.append(item)
+                temp_queue.append(item)
+
+            # Restore the original queue from the temp_queue
+            while not temp_queue.is_empty():
+                self.team_data.append(temp_queue.serve())
+
+        return cloned_team
+
     def choose_action(self, currently_out: MonsterBase, enemy: MonsterBase) -> Battle.Action:
         # This is just a placeholder function that doesn't matter much for testing.
         from battle import Battle
@@ -470,7 +481,10 @@ class MonsterTeam:
         return Battle.Action.SWAP
 
     def __len__(self):
-        return self.team_count
+        if self.team_mode == self.TeamMode.FRONT or self.team_mode == self.TeamMode.BACK:
+            return len(self.team_data)
+        elif self.team_mode == self.TeamMode.OPTIMISE:
+            return self.team_count
 
 
 if __name__ == "__main__":
