@@ -1,6 +1,7 @@
 import abc
 
 from data_structures.referential_array import ArrayR
+from data_structures.stack_adt import ArrayStack
 
 
 class Stats(abc.ABC):
@@ -55,16 +56,45 @@ class ComplexStats(Stats):
             max_hp_formula: ArrayR[str],
     ) -> None:
         # TODO: Implement
-        pass
+        self.attack_formula = attack_formula
+        self.defense_formula = defense_formula
+        self.speed_formula = speed_formula
+        self.max_hp_formula = max_hp_formula
+
+    def evaluate_expression(self, formula: ArrayR[str], level: int):
+        stack = ArrayStack(len(formula))
+        for expr in formula:
+            if expr.isnumeric():
+                stack.push(int(expr))
+            elif expr == "level":
+                stack.push(level)
+            else:
+                op2 = stack.pop()
+                op1 = stack.pop()
+                if expr == '+':
+                    stack.push(op1 + op2)
+                elif expr == '-':
+                    stack.push(op1 - op2)
+                elif expr == '*':
+                    stack.push(op1 * op2)
+                elif expr == '/':
+                    stack.push(op1 // op2)  # Integer division
+                elif expr == 'power':
+                    stack.push(op1 ** op2)
+                elif expr == 'sqrt':
+                    stack.push(int(op1 ** 0.5))
+                elif expr == 'middle':
+                    stack.push((op1 + op2) // 2)
+        return stack.pop()
 
     def get_attack(self, level: int):
-        raise NotImplementedError
+        return self.evaluate_expression(self.attack_formula, level)
 
     def get_defense(self, level: int):
-        raise NotImplementedError
+        return self.evaluate_expression(self.defense_formula, level)
 
     def get_speed(self, level: int):
-        raise NotImplementedError
+        return self.evaluate_expression(self.speed_formula, level)
 
     def get_max_hp(self, level: int):
-        raise NotImplementedError
+        return self.evaluate_expression(self.max_hp_formula, level)

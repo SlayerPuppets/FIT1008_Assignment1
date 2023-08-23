@@ -38,8 +38,12 @@ class MonsterTeam:
 
     def __init__(self, team_mode: TeamMode, selection_mode, **kwargs) -> None:
         # Add any preinit logic here.
+        self.team_count = 0
         self.team_mode = team_mode
+        if team_mode == MonsterTeam.TeamMode.OPTIMISE:
+            self.sort_key = kwargs.get('sort_key', None)
         self.team_data = ArrayR(self.TEAM_LIMIT)
+
         if selection_mode == self.SelectionMode.RANDOM:
             self.select_randomly(**kwargs)
         elif selection_mode == self.SelectionMode.MANUAL:
@@ -49,65 +53,109 @@ class MonsterTeam:
         else:
             raise ValueError(f"selection_mode {selection_mode} not supported.")
 
+    def _get_sort_value(self, monster: MonsterBase) -> int:
+        if self.sort_key == self.SortMode.HP:
+            return monster.get_hp()
+        elif self.sort_key == self.SortMode.ATTACK:
+            return monster.get_attack()
+        elif self.sort_key == self.SortMode.SPEED:
+            return monster.get_speed()
+        elif self.sort_key == self.SortMode.DEFENSE:
+            return monster.get_defense()
+        elif self.sort_key == self.SortMode.LEVEL:
+            return monster.get_level()
+        else:
+            raise ValueError(f"Unsupported sort_key: {self.sort_key}")
+
     def add_to_team(self, monster: MonsterBase):
-        if len(self.team_data) >= self.TEAM_LIMIT:
-            raise ValueError("Team is already full")
+        if self.team_count >= self.TEAM_LIMIT:
+            raise ValueError("Team is already full!")
 
         new_team = ArrayR(self.TEAM_LIMIT)
-
         if self.team_mode == self.TeamMode.FRONT:
             new_team[0] = monster
-            for i in range(len(self.team_data)):
+            for i in range(self.team_count):  # Use team_count here
                 new_team[i + 1] = self.team_data[i]
         elif self.team_mode == self.TeamMode.BACK:
-            for i in range(len(self.team_data)):
+            for i in range(self.team_count):  # Use team_count here
                 new_team[i] = self.team_data[i]
-            new_team[len(self.team_data)] = monster
+            new_team[self.team_count] = monster
         elif self.team_mode == self.TeamMode.OPTIMISE:
             inserted = False
-            for i in range(len(self.team_data)):
-                if monster.get_hp() >= self.team_data[i].get_hp():
+            for i in range(self.team_count):  # Use team_count here
+                if not inserted and self.team_data[i] is not None and self._get_sort_value(
+                        monster) > self._get_sort_value(self.team_data[i]):
                     new_team[i] = monster
-                    for j in range(i, len(self.team_data)):
-                        new_team[j + 1] = self.team_data[j]
                     inserted = True
-                    break
-                new_team[i] = self.team_data[i]
+                new_team[i + int(inserted)] = self.team_data[i]
             if not inserted:
-                new_team[len(self.team_data)] = monster
+                new_team[self.team_count] = monster
 
         self.team_data = new_team
+        self.team_count += 1
+        # new_team = ArrayR(self.TEAM_LIMIT)
+        #
+        # if self.team_mode == self.TeamMode.FRONT:
+        #     new_team[0] = monster
+        #     for i in range(len(self.team_data)):
+        #         new_team[i + 1] = self.team_data[i]
+        # elif self.team_mode == self.TeamMode.BACK:
+        #     for i in range(len(self.team_data)):
+        #         new_team[i] = self.team_data[i]
+        #     new_team[len(self.team_data)] = monster
+        # elif self.team_mode == self.TeamMode.OPTIMISE:
+        #     inserted = False
+        #
+        #     for i in range(len(self.team_data)):
+        #         if monster.get_hp() >= self.team_data[i].get_hp():
+        #             new_team[i] = monster
+        #             for j in range(i, len(self.team_data)):
+        #                 new_team[j + 1] = self.team_data[j]
+        #             inserted = True
+        #             break
+        #         new_team[i] = self.team_data[i]
+        #     if not inserted:
+        #         new_team[len(self.team_data)] = monster
+        #
+        # self.team_data = new_team
 
     def retrieve_from_team(self) -> MonsterBase:
-        if len(self.team_data) == 0:
+        if self.team_count == 0:
             raise ValueError("Team is empty")
-
         monster = self.team_data[0]
+        for i in range(1, self.team_count):
+            self.team_data[i - 1] = self.team_data[i]
 
-        new_team = ArrayR(self.TEAM_LIMIT)
-        for i in range(1, len(self.team_data)):
-            new_team[i - 1] = self.team_data[i]
+        self.team_data[self.team_count - 1] = None
 
-        self.team_data = new_team
+        # Decrease the count of monsters
+        self.team_count -= 1
         return monster
 
     def special(self) -> None:
         if self.team_mode == self.TeamMode.FRONT:
-            for i in range(min(3, len(self.team_data))):
-                self.team_data[i], self.team_data[len(self.team_data) - i - 1] = self.team_data[
-                    len(self.team_data) - i - 1], self.team_data[i]
-        elif self.team_mode == self.TeamMode.BACK:
-            mid = len(self.team_data) // 2
-            if len(self.team_data) % 2 == 0:  # Even number of monsters
-                for i in range(mid):
-                    self.team_data[i], self.team_data[mid + i] = self.team_data[mid + i], self.team_data[i]
-            else:  # Odd number of monsters
-                for i in range(mid):
-                    self.team_data[i], self.team_data[mid + 1 + i] = self.team_data[mid + 1 + i], self.team_data[i]
+            # We'll only perform swaps for half of the team, as we're swapping in pairs.
+            swaps = min(3, self.team_count // 2)
+            for i in range(swaps):
+                self.team_data[i], self.team_data[self.team_count - i - 1] = self.team_data[self.team_count - i - 1], \
+                    self.team_data[i]
+        if self.team_mode == MonsterTeam.TeamMode.BACK:
+            mid_point = self.team_count // 2
+            new_team = ArrayR(self.TEAM_LIMIT)
+            # First, place the reversed second half of the original team into the new_team
+            for idx in range(mid_point, self.team_count):
+                new_team[idx - mid_point] = self.team_data[self.team_count - 1 - (idx - mid_point)]
+            # Then, append the first half of the original team into the new_team
+            for idx in range(mid_point):
+                new_team[self.team_count - mid_point + idx] = self.team_data[idx]
+
+            self.team_data = new_team
         elif self.team_mode == self.TeamMode.OPTIMISE:
-            reversed_team_data = ArrayR(len(self.team_data))
-            for i in range(len(self.team_data)):
-                self.team_data[i] = reversed_team_data[len(self.team_data) - i - 1]
+            reversed_team_data = ArrayR(self.team_count)  # Use team_count to ensure the correct size.
+            for i in range(self.team_count):  # Loop up to team_count to avoid None values.
+                reversed_team_data[i] = self.team_data[self.team_count - i - 1]
+            self.team_data = reversed_team_data
+
 
     def regenerate_team(self) -> None:
         """
@@ -259,33 +307,33 @@ class MonsterTeam:
         Overall worst-case time complexity: O(n * k), where n is the team size and k is the number of available monsters.
         Overall best-case time complexity: O(n * k), same as worst-case.
         """
-        while True:
-            try:
-                team_size = int(input("How many monsters are there? "))
-                if 1 <= team_size <= self.TEAM_LIMIT:
-                    break
-                else:
-                    print(f"Team size should be between 1 and {self.TEAM_LIMIT}.")
-            except ValueError:
-                print("Invalid input. Please enter a valid integer.")
-
-        print("MONSTERS Are:")
-        monsters = get_all_monsters()
-        for i, monster_cls in enumerate(monsters, start=1):
-            print(f"{i}: {monster_cls.get_name()} [{'✔️' if monster_cls.can_be_spawned() else '❌'}]")
-
-        # For each monster in the team
-        for _ in range(team_size):
-            while True:
-                try:
-                    selection = int(input("Which monster are you spawning? "))
-                    if 1 <= selection <= len(monsters) and monsters[selection - 1].can_be_spawned():
-                        self.add_to_team(monsters[selection - 1])
-                        break
-                    else:
-                        print("Invalid selection. Please choose a valid monster.")
-                except ValueError:
-                    print("Invalid input. Please enter a valid integer.")
+        # while True:
+        #     try:
+        #         team_size = int(input("How many monsters are there? "))
+        #         if 1 <= team_size <= self.TEAM_LIMIT:
+        #             break
+        #         else:
+        #             print(f"Team size should be between 1 and {self.TEAM_LIMIT}.")
+        #     except ValueError:
+        #         print("Invalid input. Please enter a valid integer.")
+        #
+        # print("MONSTERS Are:")
+        # monsters = get_all_monsters()
+        # for i, monster_cls in enumerate(monsters, start=1):
+        #     print(f"{i}: {monster_cls.get_name()} [{'✔️' if monster_cls.can_be_spawned() else '❌'}]")
+        #
+        # # For each monster in the team
+        # for _ in range(team_size):
+        #     while True:
+        #         try:
+        #             selection = int(input("Which monster are you spawning? "))
+        #             if 1 <= selection <= len(monsters) and monsters[selection - 1].can_be_spawned():
+        #                 self.add_to_team(monsters[selection - 1])
+        #                 break
+        #             else:
+        #                 print("Invalid selection. Please choose a valid monster.")
+        #         except ValueError:
+        #             print("Invalid input. Please enter a valid integer.")
 
         # try:
         #     # Prompt user for team size
@@ -331,7 +379,50 @@ class MonsterTeam:
         # except ValueError:
         #     print("Invalid input. Please enter a valid team size.")
 
-    def select_provided(self, provided_monsters: Optional[ArrayR[type[MonsterBase]]] = None):
+        monsters = get_all_monsters()
+
+        while True:
+            try:
+                team_size = int(input("How many monsters are there? "))
+                if team_size <= 0 or team_size > self.TEAM_LIMIT:
+                    print("Team size must between 1 to {}.".format(self.TEAM_LIMIT))
+                else:
+                    break
+            except ValueError:
+                print("Invalid input. Please enter a valid team size.")
+
+        selected_monsters = ArrayR(team_size)
+        sel_index = 0
+
+        print("MONSTERS Available:")
+        for index, monster_class in enumerate(monsters, 1):
+            spawnable_status = "✔️" if monster_class.can_be_spawned() else "❌"
+            print(f"{index}: {monster_class.get_name()} [{spawnable_status}]")
+
+        while sel_index < team_size:
+            try:
+                selected_index = int(input("Which monster are you spawning? "))
+                if 1 <= selected_index <= len(monsters):
+                    selected_monster_class = monsters[selected_index - 1]
+                    if selected_monster_class.can_be_spawned():
+                        if sel_index < self.TEAM_LIMIT:
+                            selected_monsters[sel_index] = selected_monster_class
+                            sel_index += 1
+                            print(f"{selected_monster_class.get_name()} added to the team.")
+                        else:
+                            print("Team is already full.")
+                    else:
+                        print("This monster cannot be spawned. Please select another.")
+                else:
+                    print("Invalid monster index. Please try again.")
+            except ValueError:
+                print("Invalid input. Please enter a valid monster index.")
+
+        # Add the selected monsters to the team in the same order
+        for monster in selected_monsters:
+            self.add_to_team(monster)
+
+    def select_provided(self, provided_monsters: Optional[ArrayR[type[MonsterBase]]] = None, **kwargs):
         """
         Generates a team based on a list of already provided monster classes.
 
@@ -354,14 +445,23 @@ class MonsterTeam:
         :param provided_monsters: ArrayR of MonsterBase subclasses to form the initial team.
         :complexity: O(n), where n is the size of the provided_monsters array.
         """
-        self.team_data = ArrayR(self.TEAM_LIMIT)
+        # self.team_data = ArrayR(self.TEAM_LIMIT)
+        #
+        # # Loop through the provided monsters and add them to the team
+        # for monster_class in provided_monsters:
+        #     if len(self.team_data) >= self.TEAM_LIMIT:
+        #         break  # Stop if the team is already full
+        #     new_monster = monster_class(simple_mode=True, level=1)
+        #     self.add_to_team(new_monster)
 
-        # Loop through the provided monsters and add them to the team
+        if provided_monsters is None:
+            raise ValueError("No provided monsters found.")
+
         for monster_class in provided_monsters:
-            if len(self.team_data) >= self.TEAM_LIMIT:
-                break  # Stop if the team is already full
-            new_monster = monster_class(simple_mode=True, level=1)
-            self.add_to_team(new_monster)
+            if monster_class.can_be_spawned():
+                self.add_to_team(monster_class())
+            else:
+                raise ValueError(f"Invalid monster class provided: {monster_class}")
 
     def choose_action(self, currently_out: MonsterBase, enemy: MonsterBase) -> Battle.Action:
         # This is just a placeholder function that doesn't matter much for testing.
@@ -370,13 +470,9 @@ class MonsterTeam:
             return Battle.Action.ATTACK
         return Battle.Action.SWAP
 
+    def __len__(self):
+        return self.team_count
 
-    def __len__(self) -> int:
-        """
-        Returns the number of monsters currently in the team.
-        :return: Number of monsters in the team.
-        """
-        return len(self.team_data)
 
 if __name__ == "__main__":
     team = MonsterTeam(
