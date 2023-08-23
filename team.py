@@ -38,6 +38,7 @@ class MonsterTeam:
 
     def __init__(self, team_mode: TeamMode, selection_mode, **kwargs) -> None:
         # Add any preinit logic here.
+        self.initial_team_data = None
         self.team_count = 0
         self.team_mode = team_mode
         if team_mode == MonsterTeam.TeamMode.OPTIMISE:
@@ -156,7 +157,6 @@ class MonsterTeam:
                 reversed_team_data[i] = self.team_data[self.team_count - i - 1]
             self.team_data = reversed_team_data
 
-
     def regenerate_team(self) -> None:
         """
         Regenerates the team by recreating each monster instance and resetting their attributes.
@@ -164,9 +164,8 @@ class MonsterTeam:
         :complexity: O(n), where n is the size of the team.
         """
         new_team = ArrayR(self.TEAM_LIMIT)
-        for i in self.team_data:
-            new_monster = type(self.team_data[i])(self.team_data[i].simple_mode,
-                                                  level=1)  # Recreate the monster instance
+        for i in range(self.team_count):  # Only loop until team_count
+            new_monster = type(self.team_data[i])(self.team_data[i].simple_mode, level=1)  # Recreate the monster instance
             new_team[i] = new_monster  # Add the monster to the new team
         self.team_data = new_team
 
