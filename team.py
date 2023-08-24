@@ -80,6 +80,8 @@ class MonsterTeam:
         if len(self) >= self.TEAM_LIMIT:
             raise ValueError("Team is already full!")
 
+
+
         if self.team_mode == self.TeamMode.FRONT:
             old_data = [self.team_data.serve() for _ in range(len(self.team_data))]
             self.team_data.append(monster)
@@ -454,7 +456,9 @@ class MonsterTeam:
             # If team_mode is OPTIMISE, clone ArrayR
             cloned_team = ArrayR(self.TEAM_LIMIT)
             for i in range(len(self)):
-                cloned_team[i] = self.team_data[i]
+                monster_instance = self.team_data[i]
+                # Create a new instance for each monster
+                cloned_team[i] = type(monster_instance)()
 
         elif self.team_mode in [MonsterTeam.TeamMode.FRONT, MonsterTeam.TeamMode.BACK]:
             # If team_mode is FRONT or BACK, clone CircularQueue
@@ -463,15 +467,42 @@ class MonsterTeam:
 
             # Empty the current queue into the temp_queue
             while not self.team_data.is_empty():
-                item = self.team_data.serve()
-                cloned_team.append(item)
-                temp_queue.append(item)
+                monster_instance = self.team_data.serve()
+                # Create a new instance for each monster and add to cloned_team and temp_queue
+                new_monster = type(monster_instance)()
+                cloned_team.append(new_monster)
+                temp_queue.append(new_monster)
 
             # Restore the original queue from the temp_queue
             while not temp_queue.is_empty():
                 self.team_data.append(temp_queue.serve())
 
         return cloned_team
+        # """
+        # Clones the team data based on its mode and returns a deep copy.
+        # """
+        # if self.team_mode == MonsterTeam.TeamMode.OPTIMISE:
+        #     # If team_mode is OPTIMISE, clone ArrayR
+        #     cloned_team = ArrayR(self.TEAM_LIMIT)
+        #     for i in range(len(self)):
+        #         cloned_team[i] = self.team_data[i]
+        #
+        # elif self.team_mode in [MonsterTeam.TeamMode.FRONT, MonsterTeam.TeamMode.BACK]:
+        #     # If team_mode is FRONT or BACK, clone CircularQueue
+        #     cloned_team = CircularQueue(self.TEAM_LIMIT)
+        #     temp_queue = CircularQueue(self.TEAM_LIMIT)
+        #
+        #     # Empty the current queue into the temp_queue
+        #     while not self.team_data.is_empty():
+        #         item = self.team_data.serve()
+        #         cloned_team.append(item)
+        #         temp_queue.append(item)
+        #
+        #     # Restore the original queue from the temp_queue
+        #     while not temp_queue.is_empty():
+        #         self.team_data.append(temp_queue.serve())
+        #
+        # return cloned_team
 
     def choose_action(self, currently_out: MonsterBase, enemy: MonsterBase) -> Battle.Action:
         # This is just a placeholder function that doesn't matter much for testing.
