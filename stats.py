@@ -69,8 +69,16 @@ class ComplexStats(Stats):
             elif expr == "level":
                 stack.push(level)
             else:
-                op2 = stack.pop()
-                op1 = stack.pop()
+                if expr in ['sqrt', 'middle']:
+                    op3 = None
+                    if expr == 'middle':
+                        op3 = stack.pop()
+                    op2 = stack.pop()
+                    op1 = stack.pop() if not expr == 'sqrt' else op2
+                    op2 = op3 if expr == 'sqrt' else op2
+                else:
+                    op2 = stack.pop()
+                    op1 = stack.pop()
                 if expr == '+':
                     stack.push(op1 + op2)
                 elif expr == '-':
@@ -84,7 +92,9 @@ class ComplexStats(Stats):
                 elif expr == 'sqrt':
                     stack.push(int(op1 ** 0.5))
                 elif expr == 'middle':
-                    stack.push((op1 + op2) // 2)
+                    values = [op1, op2, op3]
+                    values.sort()
+                    stack.push(values[1])
         return stack.pop()
 
     def get_attack(self, level: int):

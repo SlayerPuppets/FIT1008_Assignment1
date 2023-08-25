@@ -80,13 +80,12 @@ class MonsterTeam:
         if len(self) >= self.TEAM_LIMIT:
             raise ValueError("Team is already full!")
 
-
-
         if self.team_mode == self.TeamMode.FRONT:
             old_data = [self.team_data.serve() for _ in range(len(self.team_data))]
             self.team_data.append(monster)
             for m in old_data:
                 self.team_data.append(m)
+
         elif self.team_mode == self.TeamMode.BACK:
             # Use append() method of CircularQueue for BACK mode
             self.team_data.append(monster)
@@ -117,6 +116,7 @@ class MonsterTeam:
         if len(self) == 0:
             raise ValueError("Team is empty")
         if self.team_mode in ArrayR(2).from_list([self.TeamMode.FRONT, self.TeamMode.BACK]):
+
             return self.team_data.serve()
 
         elif self.team_mode == self.TeamMode.OPTIMISE:
@@ -248,7 +248,7 @@ class MonsterTeam:
                     cur_index += 1
                     if cur_index == spawner_index:
                         # Spawn this monster
-                        self.add_to_team(monsters[x])
+                        self.add_to_team(monsters[x]())
                         break
             else:
                 raise ValueError("Spawning logic failed.")
@@ -411,7 +411,7 @@ class MonsterTeam:
 
         # Add the selected monsters to the team in the same order
         for monster in selected_monsters:
-            self.add_to_team(monster)
+            self.add_to_team(monster())
 
     def select_provided(self, provided_monsters: Optional[ArrayR[type[MonsterBase]]] = None, **kwargs):
         """
