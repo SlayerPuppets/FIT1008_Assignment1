@@ -26,16 +26,20 @@ class Battle:
 
         # Process SWAP/SPECIAL actions first
         if action1 == Battle.Action.SWAP:
+            self.team1.add_to_team(self.out1)
             self.out1 = self.team1.retrieve_from_team()
         elif action1 == Battle.Action.SPECIAL:
-            self.out1 = self.team1.retrieve_from_team()
+            self.team1.add_to_team(self.out1)
             self.team1.special()
+            self.out1 = self.team1.retrieve_from_team()
 
         if action2 == Battle.Action.SWAP:
+            self.team2.add_to_team(self.out2)
             self.out2 = self.team2.retrieve_from_team()
         elif action2 == Battle.Action.SPECIAL:
-            self.out2 = self.team2.retrieve_from_team()
+            self.team2.add_to_team(self.out2)
             self.team2.special()
+            self.out2 = self.team2.retrieve_from_team()
 
         # Process ATTACK actions
         if action1 == Battle.Action.ATTACK and action2 != Battle.Action.ATTACK:
@@ -70,24 +74,20 @@ class Battle:
         #         if self.out1.alive():
         #             self.out1.attack(self.out2)
 
-        if not self.out1.alive():
-            diff_hp = self.out1.get_max_hp() - self.out1.get_hp()
+        if not self.out2.alive() and self.out1.alive():
             self.out1.level_up()
             if self.out1.ready_to_evolve():
                 self.out1 = self.out1.evolve()
-                self.out1.set_hp(self.out1.get_max_hp() - diff_hp)
-            self.out1 = self.team1.retrieve_from_team()
-            if self.out1 is None:
+            self.out2 = self.team2.retrieve_from_team()
+            if self.out2 is None:
                 return Battle.Result.TEAM2
 
-        if not self.out2.alive():
-            diff_hp = self.out2.get_max_hp() - self.out2.get_hp()
+        if not self.out1.alive() and self.out2.alive():
             self.out2.level_up()
             if self.out2.ready_to_evolve():
                 self.out2 = self.out2.evolve()
-                self.out2.set_hp(self.out2.get_max_hp() - diff_hp)
-            self.out2 = self.team2.retrieve_from_team()
-            if self.out2 is None:
+            self.out1 = self.team1.retrieve_from_team()
+            if self.out1 is None:
                 return Battle.Result.TEAM1
 
         # Subtract 1 from HP if both survive
@@ -107,6 +107,7 @@ class Battle:
         while result is None:
             result = self.process_turn()
         return result
+
 
 if __name__ == "__main__":
     t1 = MonsterTeam(MonsterTeam.TeamMode.BACK, MonsterTeam.SelectionMode.RANDOM)

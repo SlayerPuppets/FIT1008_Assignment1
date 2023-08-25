@@ -72,7 +72,7 @@ class MonsterBase(abc.ABC):
 
     def alive(self) -> bool:
         """Whether the current monster instance is alive (HP > 0 )"""
-        return self.get_hp() != 0
+        return self.get_hp() > 0
 
     def attack(self, other: MonsterBase):
         """Attack another monster instance"""
