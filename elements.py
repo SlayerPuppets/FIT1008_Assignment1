@@ -86,6 +86,9 @@ class EffectivenessCalculator:
 
         Example: EffectivenessCalculator.get_effectiveness(Element.FIRE, Element.WATER) == 0.5
         """
+        """
+        Time Complexity: O(n^2), where n is the length of element_names
+        """
         element_names = cls.instance.element_names
         element_index = ArrayR(len(element_names))
         for i in range(len(element_names)):

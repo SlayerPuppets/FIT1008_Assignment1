@@ -24,7 +24,7 @@ class Stats(abc.ABC):
 
 
 class SimpleStats(Stats):
-    """Unless stated otherwise, all methods in this classes are O(1) best/worst case."""
+    """Unless stated otherwise, all methods in this class are O(1) best/worst case."""
 
     def __init__(self, attack, defense, speed, max_hp) -> None:
         # TODO: Implement
@@ -62,6 +62,14 @@ class ComplexStats(Stats):
         self.max_hp_formula = max_hp_formula
 
     def evaluate_expression(self, formula: ArrayR[str], level: int):
+        """
+            This method evaluates a given expression.
+            Time Complexity:
+            O(n), where n is the length of the formula.
+            This is because we traverse the formula once in O(n) time complexity.
+            All other operations inside the loop (including the sorting for 'middle' operation)
+            are performed in O(1) time complexity.
+            """
         stack = ArrayStack(len(formula))
         for expr in formula:
             if expr.isnumeric():
@@ -93,9 +101,16 @@ class ComplexStats(Stats):
                     stack.push(int(op1 ** 0.5))
                 elif expr == 'middle':
                     values = [op1, op2, op3]
-                    values.sort()
+                    if values[0] > values[1]:
+                        values[0], values[1] = values[1], values[0]
+                    if values[0] > values[2]:
+                        values[0], values[2] = values[2], values[0]
+                    if values[1] > values[2]:
+                        values[1], values[2] = values[2], values[1]
                     stack.push(values[1])
         return stack.pop()
+
+    """All methods below are O(1) best/worst case."""
 
     def get_attack(self, level: int):
         return self.evaluate_expression(self.attack_formula, level)

@@ -19,63 +19,85 @@ class MonsterBase(abc.ABC):
         self.hp = self.get_max_hp()
         self.already_evo = False
 
+    """Unless stated otherwise, all methods in this class are O(1) best/worst case."""
     def get_level(self):
-        """The current level of this monster instance"""
+        """
+        The current level of this monster instance
+        """
         return self.level
 
     def level_up(self):
-        """Increase the level of this monster instance by 1"""
+        """
+        Increase the level of this monster instance by 1
+        """
         HP_sub = self.get_max_hp() - self.get_hp()
         self.level += 1
         self.set_hp(self.get_max_hp() - HP_sub)
         self.already_evo = True
 
     def get_hp(self):
-        """Get the current HP of this monster instance"""
+        """
+        Get the current HP of this monster instance
+        """
         return self.hp
 
     def set_hp(self, val):
-        """Set the current HP of this monster instance"""
+        """
+        Set the current HP of this monster instance
+        """
         self.hp = val
 
     def get_attack(self):
-        """Get the attack of this monster instance"""
+        """
+        Get the attack of this monster instance
+        """
         if self.simple_mode:
-            return self.get_simple_stats().attack
+            return self.get_simple_stats().get_attack()
 
         else:
-            return self.get_complex_stats().attack
+            return self.get_complex_stats().get_attack()
 
     def get_defense(self):
-        """Get the defense of this monster instance"""
+        """
+        Get the defense of this monster instance
+        """
         if self.simple_mode:
-            return self.get_simple_stats().defense
+            return self.get_simple_stats().get_defense()
 
         else:
-            return self.get_complex_stats().defense
+            return self.get_complex_stats().get_defense()
 
     def get_speed(self):
-        """Get the speed of this monster instance"""
+        """
+        Get the speed of this monster instance
+        """
         if self.simple_mode:
-            return self.get_simple_stats().speed
+            return self.get_simple_stats().get_speed()
 
         else:
-            return self.get_complex_stats().speed
+            return self.get_complex_stats().get_speed()
 
     def get_max_hp(self):
-        """Get the maximum HP of this monster instance"""
+        """
+        Get the max hp of this monster instance
+        """
         if self.simple_mode:
-            return self.get_simple_stats().max_hp
+            return self.get_simple_stats().get_max_hp()
 
         else:
-            return self.get_complex_stats().max_hp
+            return self.get_complex_stats().get_max_hp()
 
     def alive(self) -> bool:
-        """Whether the current monster instance is alive (HP > 0 )"""
+        """
+        Whether the current monster instance is alive (HP > 0 )
+        """
         return self.get_hp() > 0
 
     def attack(self, other: MonsterBase):
-        """Attack another monster instance"""
+        """
+        Attack another monster instance
+        Time Complexity: O(n^2), where n is the length of element_names in the EffectivenessCalculator class.
+        """
         # Step 1: Compute attack stat vs. defense stat
         attack_stat = self.get_attack()
         defense_stat = self.get_defense()
